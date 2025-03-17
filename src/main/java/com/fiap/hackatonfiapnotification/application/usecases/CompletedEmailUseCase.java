@@ -3,7 +3,7 @@ package com.fiap.hackatonfiapnotification.application.usecases;
 import com.fiap.hackatonfiapnotification.core.service.EmailService;
 import com.fiap.hackatonfiapnotification.core.utils.FileToByteArray;
 import com.fiap.hackatonfiapnotification.core.service.S3Service;
-import com.fiap.hackatonfiapnotification.core.domain.VideoMessage;
+import com.fiap.hackatonfiapnotification.core.domain.Video;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -21,8 +21,8 @@ public class CompletedEmailUseCase {
         this.emailService = emailService;
     }
 
-    public void execute(VideoMessage videoMessage) throws IOException {
-        File zipFile = s3Service.downloadFile(videoMessage);
+    public void executeZipFileAndSendEmail(Video video) throws IOException {
+        File zipFile = s3Service.downloadFile(video);
         byte[] attachment = FileToByteArray.convertFileToBytes(zipFile);
         String subject = "Seu vídeo processado com sucesso";
         String body = """
@@ -31,8 +31,8 @@ public class CompletedEmailUseCase {
                 O frames do seu vídeo já estão gerados e você pode baixá-los no anexo deste email.
                 
                 Ou acessar a aba de download informando o nome do vídeo: %s
-                """.formatted(videoMessage.getUser(), videoMessage.getVideoKeyS3());
+                """.formatted(video.getUser(), video.getVideoKeyS3());
 
-        emailService.sendEmail(videoMessage.getEmail(), subject, body, attachment, videoMessage.getZipKeyS3());
+        emailService.sendEmail(video.getEmail(), subject, body, attachment, video.getZipKeyS3());
     }
 }

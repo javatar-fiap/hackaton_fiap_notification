@@ -1,6 +1,6 @@
 package com.fiap.hackatonfiapnotification.core.service;
 
-import com.fiap.hackatonfiapnotification.application.exception.EmailSendingException;
+import com.fiap.hackatonfiapnotification.application.exception.EmailException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,15 +30,14 @@ public class EmailService {
 
 
     public void sendEmail(String to, String subject, String body, byte[] attachment, String zipKeyS3) {
-        String host = "smtp.gmail.com";
-        String from = smtpEmail;
-        Properties properties = new Properties();
+        var host = "smtp.gmail.com";
+        var properties = new Properties();
         properties.put("mail.smtp.host", host);
         properties.put("mail.smtp.port", "587");
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.starttls.enable", "true");
 
-        Session session = Session.getInstance(properties, new Authenticator() {
+        var session = Session.getInstance(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(smtpEmail, smtpPassword);
@@ -46,23 +45,23 @@ public class EmailService {
         });
 
         try {
-            MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(from));
+            var message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(smtpEmail));
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(to));
             message.setSubject(subject);
 
-            MimeBodyPart textPart = new MimeBodyPart();
+            var textPart = new MimeBodyPart();
             textPart.setText(body);
 
-            Multipart multipart = new MimeMultipart();
+            var multipart = new MimeMultipart();
             multipart.addBodyPart(textPart);
 
             if (attachment != null) {
-                MimeBodyPart attachmentPart = new MimeBodyPart();
+                var attachmentPart = new MimeBodyPart();
                 DataSource source = new ByteArrayDataSource(attachment, "application/zip");
                 attachmentPart.setDataHandler(new DataHandler(source));
 
-                String fileName = zipKeyS3.substring(zipKeyS3.lastIndexOf("/") + 1);
+                var fileName = zipKeyS3.substring(zipKeyS3.lastIndexOf("/") + 1);
                 attachmentPart.setFileName(fileName);
 
                 multipart.addBodyPart(attachmentPart);
@@ -70,9 +69,8 @@ public class EmailService {
 
             message.setContent(multipart);
             Transport.send(message);
-            log.info("E-mail enviado com sucesso para: {}", (Object) message.getAllRecipients());
         } catch (MessagingException e) {
-            throw new EmailSendingException("Erro ao enviar e-mail", e);
+            throw new EmailException("Error to send e-mail", e);
         }
 
     }
