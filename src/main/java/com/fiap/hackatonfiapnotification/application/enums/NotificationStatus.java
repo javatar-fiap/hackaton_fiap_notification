@@ -1,6 +1,6 @@
 package com.fiap.hackatonfiapnotification.application.enums;
 
-public enum VideoStatus {
+public enum NotificationStatus {
     PENDING,
     IN_PROGRESS,
     COMPLETED,
