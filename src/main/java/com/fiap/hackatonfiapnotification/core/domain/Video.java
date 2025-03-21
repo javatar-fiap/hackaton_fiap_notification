@@ -1,6 +1,6 @@
 package com.fiap.hackatonfiapnotification.core.domain;
 
-public class VideoMessage {
+public class Video {
 
     private String zipKeyS3;
     private String videoKeyS3;

@@ -1,6 +1,6 @@
 package com.fiap.hackatonfiapnotification.application.usecases;
 
-import com.fiap.hackatonfiapnotification.core.domain.VideoMessage;
+import com.fiap.hackatonfiapnotification.core.domain.Video;
 import com.fiap.hackatonfiapnotification.core.service.EmailService;
 import org.springframework.stereotype.Service;
 
@@ -13,17 +13,17 @@ public class ErrorEmailUseCase {
         this.emailService = emailService;
     }
 
-    public void execute(VideoMessage videoMessage) {
-        String subject = "Erro ao processar vídeo";
+    public void execute(Video video) {
+        String subject = "Error ao processar imagens do vídeo";
         String body = """
                 Olá %s,
                 
-                Houve um erro ao processar o vídeo: %s
+                Houve um erro ao processar as imagens do vídeo: %s
                 
                 Tente novamente enviando um vídeo válido.
-                """.formatted(videoMessage.getUser(), videoMessage.getVideoKeyS3());
+                """.formatted(video.getUser(), video.getVideoKeyS3());
 
-        emailService.sendEmail(videoMessage.getEmail(), subject, body, null, null);
+        emailService.sendEmail(video.getEmail(), subject, body, null, null);
     }
 }
 

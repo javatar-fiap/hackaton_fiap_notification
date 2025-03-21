@@ -1,4 +1,5 @@
 package com.fiap.hackatonfiapnotification.infraestructure.config;
+
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicSessionCredentials;
 import com.amazonaws.services.sns.AmazonSNS;
@@ -9,17 +10,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.regions.Region;
 
+@Setter
 @Configuration
-public class SNSConfig {
-    @Setter
+public class SNSConfiguration {
+
     @Value("${aws.accessKeyId}")
     private String accessKeyId;
 
-    @Setter
     @Value("${aws.secretAccessKey}")
     private String secretAccessKey;
 
-    @Setter
     @Value("${aws.token}")
     private String token;
 
@@ -27,9 +27,9 @@ public class SNSConfig {
 
     @Bean
     public AmazonSNS snsClient() {
-        BasicSessionCredentials credentials = new BasicSessionCredentials(accessKeyId, secretAccessKey, token);
+        var credentials = new BasicSessionCredentials(accessKeyId, secretAccessKey, token);
 
-        return  AmazonSNSClientBuilder.standard()
+        return AmazonSNSClientBuilder.standard()
                 .withRegion(regionName)
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .build();

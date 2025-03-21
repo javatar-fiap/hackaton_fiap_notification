@@ -1,37 +1,39 @@
 package com.fiap.hackatonfiapnotification.core.service;
 
 
-import com.fiap.hackatonfiapnotification.infraestructure.config.S3Config;
-import com.fiap.hackatonfiapnotification.application.exception.VideoDownloadException;
-import com.fiap.hackatonfiapnotification.core.domain.VideoMessage;
+import com.fiap.hackatonfiapnotification.application.exception.DownloadException;
+import com.fiap.hackatonfiapnotification.core.domain.Video;
+import com.fiap.hackatonfiapnotification.infraestructure.config.S3Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.file.Files;
 
 @Service
 public class S3Service {
 
-    private final S3Config s3Config;
+    private final S3Configuration s3Configuration;
 
     @Value("${aws.s3.bucketZip}")
     private String bucketZipName;
 
-    public S3Service(S3Config s3Config) {
-        this.s3Config = s3Config;
+    public S3Service(S3Configuration s3Configuration) {
+        this.s3Configuration = s3Configuration;
     }
 
-    public File downloadFile(VideoMessage videoMessage) {
+    public File downloadFile(Video video) {
         try {
-            GetObjectRequest request = GetObjectRequest.builder()
+            var request = GetObjectRequest.builder()
                     .bucket(bucketZipName)
-                    .key(videoMessage.getZipKeyS3())
+                    .key(video.getZipKeyS3())
                     .build();
 
-            File tempFile = Files.createTempFile("video", ".mp4").toFile();
-            try (InputStream inputStream = s3Config.getS3Client().getObject(request);
+            var tempFile = Files.createTempFile("video", ".mp4").toFile();
+            try (InputStream inputStream = s3Configuration.getS3Client().getObject(request);
                  FileOutputStream outputStream = new FileOutputStream(tempFile)) {
                 byte[] buffer = new byte[1024];
                 int bytesRead;
@@ -39,11 +41,11 @@ public class S3Service {
                     outputStream.write(buffer, 0, bytesRead);
                 }
             }
-            tempFile.deleteOnExit();
 
+            tempFile.deleteOnExit();
             return tempFile;
         } catch (Exception e) {
-            throw new VideoDownloadException("Erro ao baixar vídeo do S3", e);
+            throw new DownloadException("Error to download video from S3", e);
         }
     }
 }
